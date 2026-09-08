@@ -3,6 +3,7 @@ import { ANIONS, CATIONS, SAMPLES, type Ion, type StepId } from './data/ions'
 import { InputConsole } from './components/InputConsole'
 import { BalanceChamber } from './components/BalanceChamber'
 import { BatteryLab } from './components/BatteryLab'
+import { DigestiveLab } from './components/DigestiveLab'
 import {
   CourseSidebar,
   type CourseId,
@@ -131,7 +132,20 @@ function AppShell() {
   const { t, locale, setLocale } = useI18n()
   const [activeCourse, setActiveCourse] = useState<CourseId>('formula')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const isFormula = activeCourse === 'formula'
+  const heading =
+    activeCourse === 'formula'
+      ? { title: t('app.title'), subtitle: t('app.subtitle'), question: t('app.coreQuestion') }
+      : activeCourse === 'battery'
+        ? {
+            title: t('battery.title'),
+            subtitle: t('battery.eyebrow'),
+            question: t('battery.intro'),
+          }
+        : {
+            title: t('digest.title'),
+            subtitle: t('digest.eyebrow'),
+            question: t('digest.coreQuestion'),
+          }
 
   return (
     <div className={`course-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -145,12 +159,10 @@ function AppShell() {
       <div className="app">
         <header className="topbar">
           <div className="topbar__brand">
-            <h1>{isFormula ? t('app.title') : t('battery.title')}</h1>
-            <p>{isFormula ? t('app.subtitle') : t('battery.eyebrow')}</p>
+            <h1>{heading.title}</h1>
+            <p>{heading.subtitle}</p>
           </div>
-          <p className="topbar__question">
-            {isFormula ? t('app.coreQuestion') : t('battery.intro')}
-          </p>
+          <p className="topbar__question">{heading.question}</p>
           <div className="topbar__actions">
             <span className="live-pill">
               <i />
@@ -171,11 +183,24 @@ function AppShell() {
               >
                 {t('lang.zh')}
               </button>
+              <button
+                type="button"
+                className={locale === 'fr' ? 'is-active' : ''}
+                onClick={() => setLocale('fr')}
+              >
+                {t('lang.fr')}
+              </button>
             </div>
           </div>
         </header>
 
-        {isFormula ? <FormulaCourse /> : <BatteryLab />}
+        {activeCourse === 'formula' ? (
+          <FormulaCourse />
+        ) : activeCourse === 'battery' ? (
+          <BatteryLab />
+        ) : (
+          <DigestiveLab />
+        )}
       </div>
     </div>
   )

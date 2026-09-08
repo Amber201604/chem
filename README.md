@@ -8,7 +8,8 @@ Interactive junior-chemistry courseware for turning **valency into chemical form
 - Auto-derive simplest ratios (cross valency + GCD)
 - 5-step teaching flow (mark → cross → subscript → simplify → verify)
 - **3D balance chamber** with OrbitControls (drag to rotate, scroll to zoom)
-- English / Chinese toggle (**default: English**)
+- English / Chinese / French toggle (**default: English**)
+- Digestive-system lab: drag a tomato from chewing to gastric pepsin and mucosa-cell enzyme production
 
 ## Run
 
