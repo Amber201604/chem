@@ -1,4 +1,7 @@
-export type Locale = 'en' | 'zh'
+import { digestive } from './digestive'
+import { frBase } from './frBase'
+
+export type Locale = 'en' | 'zh' | 'fr'
 
 export const translations = {
   en: {
@@ -10,6 +13,7 @@ export const translations = {
     'app.dragHint': 'Drag to orbit · Scroll to zoom · Right-drag to pan',
     'lang.en': 'EN',
     'lang.zh': '中文',
+    'lang.fr': 'FR',
     'nav.title': 'Course contents',
     'nav.subtitle': 'INTERACTIVE CHEMISTRY',
     'nav.expand': 'Expand course contents',
@@ -18,6 +22,7 @@ export const translations = {
     'nav.formulaDesc': 'Build ionic formulae in 3D',
     'nav.battery': 'How a battery works',
     'nav.batteryDesc': 'Assemble a Daniell cell',
+    ...digestive.en,
     'nav.note': 'Select a lesson to enter its interactive laboratory.',
 
     'console.title': 'Input Console',
@@ -197,6 +202,7 @@ export const translations = {
     'app.dragHint': '拖拽旋转视角 · 滚轮缩放 · 右键平移',
     'lang.en': 'EN',
     'lang.zh': '中文',
+    'lang.fr': 'FR',
     'nav.title': '课程目录',
     'nav.subtitle': '互动化学实验室',
     'nav.expand': '展开课程目录',
@@ -205,6 +211,7 @@ export const translations = {
     'nav.formulaDesc': '在 3D 模型中推导离子化学式',
     'nav.battery': '电池如何工作',
     'nav.batteryDesc': '组装一个丹尼尔电池',
+    ...digestive.zh,
     'nav.note': '选择课程，进入对应的互动实验室。',
 
     'console.title': '组分选择舱',
@@ -367,6 +374,10 @@ export const translations = {
     'battery.modelTitle': '教学模型说明',
     'battery.modelBody':
       '移动圆点只表示运动方向，不代表真实粒子轨迹或尺度。电子经过金属导线，离子在溶液和盐桥中迁移；传统电流方向与电子流方向相反。',
+  },
+  fr: {
+    ...frBase,
+    ...digestive.fr,
   },
 } as const
 

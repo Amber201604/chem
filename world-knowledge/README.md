@@ -13,6 +13,7 @@ Agent 编写/修改化学课件时，请同时遵循项目 skill：
 | [atoms-and-particles.md](./atoms-and-particles.md) | 元素的质子、中子、电子数量（本课件用到的元素） |
 | [electron-rotation-symmetry.md](./electron-rotation-symmetry.md) | 无外加磁场时，电子顺/逆时针旋转概率相等 |
 | [daniell-cell.md](./daniell-cell.md) | 锌—铜丹尼尔电池的电极反应、电子流、盐桥与教学模型限制 |
+| [digestion-tomato.md](./digestion-tomato.md) | 口腔到胃：唾液淀粉酶、HCl、胃蛋白酶原/胃蛋白酶、细胞呼吸与酶原分泌 |
 
 ## 约定
 

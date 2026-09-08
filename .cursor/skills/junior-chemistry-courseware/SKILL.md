@@ -32,8 +32,8 @@ description: >-
    - code (`src/data/atoms.ts` etc.)
    - `world-knowledge/` (and index in `world-knowledge/README.md`)
 
-4. **Bilingual**  
-   Default UI locale is **English**. Every new user-facing string needs `en` + `zh` in `src/i18n/translations.ts`.
+4. **Languages**  
+   Default UI locale is **English**. Every new user-facing string needs `en` + `zh` + `fr` (`src/i18n/translations.ts` and locale modules).
 
 5. **Polyatomic ions**  
    NH₄⁺, OH⁻, SO₄²⁻, NO₃⁻: no fake single-atom Bohr model. Explain as a group; offer Cl/O (or metal) demos instead.
@@ -68,6 +68,7 @@ Known docs:
 
 - [atoms-and-particles.md](../../world-knowledge/atoms-and-particles.md)
 - [electron-rotation-symmetry.md](../../world-knowledge/electron-rotation-symmetry.md)
+- [digestion-tomato.md](../../world-knowledge/digestion-tomato.md)
 
 ## Reference
 
