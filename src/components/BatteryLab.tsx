@@ -83,6 +83,14 @@ const copy = {
     check: 'Check answer',
     correct: 'Correct. Zn atoms become Zn²⁺, so [Zn²⁺] rises.',
     tryAgain: 'Revisit the oxidation half-reaction and track where its product appears.',
+    saltQuestion: 'The salt bridge is removed and this model reads 0.00 V. Which explanation best accounts for the loss of sustained operation?',
+    saltA: 'A. The standard reduction potentials both become zero.',
+    saltB: 'B. Electrons begin to flow through the solutions.',
+    saltC: 'C. Charge separation builds up in the half-cells.',
+    saltD: 'D. Zinc can no longer undergo oxidation.',
+    saltCorrect: 'Correct. Without ion migration, charge separation rapidly opposes further electron transfer.',
+    noviceNudge: 'Start with one visible feature: is there an unbroken path through both the wire and the solutions?',
+    examNudge: 'Frame your claim with evidence and reasoning, then connect it to Q or charge balance.',
     frq: 'FRQ extension',
     frqBody: 'Predict how increasing [Zn²⁺] while holding [Cu²⁺] constant changes Ecell. Justify with Q and the Nernst equation.',
     rubric: 'Scoring guideline',
@@ -166,6 +174,14 @@ const copy = {
     check: '检查答案',
     correct: '正确。Zn 原子变为 Zn²⁺，所以 [Zn²⁺] 上升。',
     tryAgain: '回到氧化半反应，追踪生成物出现在哪里。',
+    saltQuestion: '移除盐桥后，本模型显示 0.00 V。哪项最能解释装置无法持续工作？',
+    saltA: 'A. 两个标准还原电势都变为零。',
+    saltB: 'B. 电子开始通过溶液流动。',
+    saltC: 'C. 两个半电池中不断积累电荷分离。',
+    saltD: 'D. 锌不再能够发生氧化。',
+    saltCorrect: '正确。没有离子迁移，电荷分离会迅速阻碍进一步的电子转移。',
+    noviceNudge: '先看一个可见特征：导线和溶液中的两条通路都完整吗？',
+    examNudge: '用“主张—证据—推理”组织答案，再联系 Q 或电荷平衡。',
     frq: 'FRQ 拓展',
     frqBody: '保持 [Cu²⁺] 不变而提高 [Zn²⁺]，预测 Ecell 的变化。用 Q 和能斯特方程说明。',
     rubric: '评分标准',
@@ -249,6 +265,14 @@ const copy = {
     check: 'Vérifier',
     correct: 'Correct. Zn devient Zn²⁺, donc [Zn²⁺] augmente.',
     tryAgain: 'Reprenez la demi-équation d’oxydation et suivez son produit.',
+    saltQuestion: 'Le pont salin est retiré et ce modèle indique 0,00 V. Pourquoi le fonctionnement ne peut-il pas durer ?',
+    saltA: 'A. Les deux potentiels standard deviennent nuls.',
+    saltB: 'B. Les électrons circulent alors dans les solutions.',
+    saltC: 'C. Une séparation de charge s’accumule dans les demi-piles.',
+    saltD: 'D. Le zinc ne peut plus être oxydé.',
+    saltCorrect: 'Correct. Sans migration ionique, la séparation de charge s’oppose rapidement au transfert d’électrons.',
+    noviceNudge: 'Commencez par un détail visible : les voies dans le fil et les solutions sont-elles toutes deux continues ?',
+    examNudge: 'Structurez affirmation, preuve et raisonnement, puis reliez-les à Q ou à l’équilibre de charge.',
     frq: 'Extension FRQ',
     frqBody: 'Prédisez l’effet d’une hausse de [Zn²⁺] sur Ecell. Justifiez avec Q et Nernst.',
     rubric: 'Barème',
@@ -287,6 +311,23 @@ export function BatteryLab() {
   const [rubricOpen, setRubricOpen] = useState(false)
   const result = useMemo(() => solveChemistry(lab), [lab])
   const operating = result.reactionType !== 'Open-Circuit'
+  const practiceData = useMemo(
+    () =>
+      result.fault === 'salt-bridge'
+        ? {
+            question: c.saltQuestion,
+            options: [c.saltA, c.saltB, c.saltC, c.saltD],
+            correctAnswer: 'c',
+            feedback: c.saltCorrect,
+          }
+        : {
+            question: c.question,
+            options: [c.a, c.b, c.c, c.d],
+            correctAnswer: 'b',
+            feedback: c.correct,
+          },
+    [c, result.fault],
+  )
 
   const updateConcentration = (side: 'left' | 'right', value: number) => {
     setLab((current) => ({
@@ -301,7 +342,9 @@ export function BatteryLab() {
     if (normalized.includes('zero') || normalized.includes('零') || normalized.includes('nulle')) response = c.voltageFault
     else if (normalized.includes('mass') || normalized.includes('质量') || normalized.includes('masse')) response = c.massPrompt
     else if (normalized.includes('k+') || normalized.includes('ion') || normalized.includes('移动')) response = c.ionPrompt
-    if (misconception.trim()) response = `${response} (${c.misconception}: ${misconception.trim()})`
+    if (applied && mastery === 'novice') response = `${response} ${c.noviceNudge}`
+    if (applied && mastery === 'exam') response = `${response} ${c.examNudge}`
+    if (applied && misconception.trim()) response = `${response} (${c.misconception}: ${misconception.trim()})`
     setMessages((current) => [...current, { role: 'student', text: question }, { role: 'tutor', text: response }])
     setDraft('')
   }
@@ -368,7 +411,7 @@ export function BatteryLab() {
                 <span>Cu²⁺ {c.concentration}<b>{lab.right.concentrationM.toFixed(1)} M</b></span>
                 <input type="range" min="0.1" max="2" step="0.1" value={lab.right.concentrationM} onChange={(e) => updateConcentration('right', Number(e.target.value))} />
               </label>
-              <button type="button" className={`ap-toggle ${lab.saltBridge === 'connected' ? 'is-on' : 'is-fault'}`} onClick={() => setLab((x) => ({ ...x, saltBridge: nextBridge(x.saltBridge), switchClosed: false }))}>
+              <button type="button" className={`ap-toggle ${lab.saltBridge === 'connected' ? 'is-on' : 'is-fault'}`} onClick={() => { setLab((x) => ({ ...x, saltBridge: nextBridge(x.saltBridge), switchClosed: false })); setAnswer(''); setChecked(false) }}>
                 <span>⌁</span><div><small>{c.bridge}</small><strong>{lab.saltBridge === 'connected' ? c.connected : lab.saltBridge === 'missing' ? c.missing : c.clogged}</strong></div>
               </button>
               <button type="button" className={`ap-toggle ${lab.left.polished ? 'is-on' : 'is-fault'}`} onClick={() => setLab((x) => ({ ...x, left: { ...x.left, polished: !x.left.polished }, switchClosed: false }))}>
@@ -430,12 +473,15 @@ export function BatteryLab() {
             <div className="ap-practice">
               <span className="ap-generated">{c.generated}</span>
               <h3>{c.practiceTitle}</h3>
-              <p>{c.question}</p>
+              <p>{practiceData.question}</p>
               <div className="ap-options">
-                {(['a', 'b', 'c', 'd'] as const).map((key) => <button type="button" className={answer === key ? 'is-selected' : ''} onClick={() => { setAnswer(key); setChecked(false) }} key={key}>{c[key]}</button>)}
+                {practiceData.options.map((option, index) => {
+                  const key = ['a', 'b', 'c', 'd'][index]
+                  return <button type="button" className={answer === key ? 'is-selected' : ''} onClick={() => { setAnswer(key); setChecked(false) }} key={key}>{option}</button>
+                })}
               </div>
               <button className="ap-check" type="button" disabled={!answer} onClick={() => setChecked(true)}>{c.check}</button>
-              {checked && <div className={`ap-feedback ${answer === 'b' ? 'is-correct' : ''}`}>{answer === 'b' ? c.correct : c.tryAgain}</div>}
+              {checked && <div className={`ap-feedback ${answer === practiceData.correctAnswer ? 'is-correct' : ''}`}>{answer === practiceData.correctAnswer ? practiceData.feedback : c.tryAgain}</div>}
               <div className="ap-frq"><span>{c.frq}</span><p>{c.frqBody}</p><button type="button" onClick={() => setRubricOpen((x) => !x)}>{c.reveal}</button>{rubricOpen && <div><strong>{c.rubric}</strong><p>{c.rubricBody}</p></div>}</div>
               <a className="ap-official" href="https://apcentral.collegeboard.org/courses/ap-chemistry/exam/past-exam-questions" target="_blank" rel="noreferrer">{c.official}</a>
             </div>
