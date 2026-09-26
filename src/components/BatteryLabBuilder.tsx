@@ -680,7 +680,21 @@ function ApparatusShelf({ c, selected, onSelect, onClear, onPreset }: { c: Shelf
 }
 
 function DropZone({ target, label, selected, className = '', onDrop, onTarget, children }: { target: DropTarget; label: string; selected: ItemId | null; className?: string; onDrop: (event: DragEvent, target: DropTarget) => void; onTarget: (target: DropTarget) => void; children?: ReactNode }) {
-  return <button type="button" className={`builder-drop-zone ${children ? 'has-item' : ''} ${selected ? 'is-awaiting' : ''} ${className}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, target)} onClick={() => onTarget(target)}>{children ?? <span>＋<small>{label}</small></span>}</button>
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={`builder-drop-zone ${children ? 'has-item' : ''} ${selected ? 'is-awaiting' : ''} ${className}`}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => onDrop(event, target)}
+      onClick={() => onTarget(target)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') onTarget(target)
+      }}
+    >
+      {children ?? <span>＋<small>{label}</small></span>}
+    </div>
+  )
 }
 
 function Workbench({ c, assembly, result, running, leftSolution, rightSolution, selectedItem, onDrop, onTarget, onRemove }: { c: ShelfCopy; assembly: Assembly; result: ChemistryResult; running: boolean; leftSolution: (typeof SOLUTIONS)[SolutionId] | null; rightSolution: (typeof SOLUTIONS)[SolutionId] | null; selectedItem: ItemId | null; onDrop: (event: DragEvent, target: DropTarget) => void; onTarget: (target: DropTarget) => void; onRemove: (key: keyof Assembly) => void }) {
