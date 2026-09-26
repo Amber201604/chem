@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ANIONS, CATIONS, SAMPLES, type Ion, type StepId } from './data/ions'
 import { InputConsole } from './components/InputConsole'
 import { BalanceChamber } from './components/BalanceChamber'
-import { BatteryLab } from './components/BatteryLab'
+import { BatteryLabBuilder } from './components/BatteryLabBuilder'
 import { DigestiveLab } from './components/DigestiveLab'
 import {
   CourseSidebar,
@@ -132,6 +132,10 @@ function AppShell() {
   const { t, locale, setLocale } = useI18n()
   const [activeCourse, setActiveCourse] = useState<CourseId>('formula')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const selectCourse = (course: CourseId) => {
+    setActiveCourse(course)
+    if (course === 'battery') setSidebarCollapsed(true)
+  }
   const heading =
     activeCourse === 'formula'
       ? { title: t('app.title'), subtitle: t('app.subtitle'), question: t('app.coreQuestion') }
@@ -152,7 +156,7 @@ function AppShell() {
       <CourseSidebar
         activeCourse={activeCourse}
         collapsed={sidebarCollapsed}
-        onSelect={setActiveCourse}
+        onSelect={selectCourse}
         onToggle={() => setSidebarCollapsed((value) => !value)}
       />
 
@@ -197,7 +201,7 @@ function AppShell() {
         {activeCourse === 'formula' ? (
           <FormulaCourse />
         ) : activeCourse === 'battery' ? (
-          <BatteryLab />
+          <BatteryLabBuilder />
         ) : (
           <DigestiveLab />
         )}
