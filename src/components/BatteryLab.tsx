@@ -297,7 +297,7 @@ export function BatteryLab() {
 
   const askTutor = (question: string) => {
     const normalized = question.toLowerCase()
-    let response = c.genericPrompt
+    let response: string = c.genericPrompt
     if (normalized.includes('zero') || normalized.includes('零') || normalized.includes('nulle')) response = c.voltageFault
     else if (normalized.includes('mass') || normalized.includes('质量') || normalized.includes('masse')) response = c.massPrompt
     else if (normalized.includes('k+') || normalized.includes('ion') || normalized.includes('移动')) response = c.ionPrompt
