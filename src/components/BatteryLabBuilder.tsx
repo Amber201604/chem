@@ -493,27 +493,42 @@ export function BatteryLabBuilder() {
   const placeItem = (item: ItemId, target: DropTarget) => {
     setRunning(false)
     resetQuestion()
+    const side = target.startsWith('left-')
+      ? 'left'
+      : target.startsWith('right-')
+        ? 'right'
+        : null
+    const routedTarget: DropTarget =
+      item === 'beaker' && side
+        ? `${side}-beaker`
+        : item.startsWith('metal:') && side
+          ? `${side}-electrode`
+          : item.startsWith('solution:') && side
+            ? `${side}-solution`
+            : item === 'sandpaper' && side
+              ? `${side}-electrode`
+              : target
     setAssembly((current) => {
       const next = { ...current }
-      if (item === 'beaker' && target === 'left-beaker') next.leftBeaker = true
-      else if (item === 'beaker' && target === 'right-beaker') next.rightBeaker = true
-      else if (item.startsWith('metal:') && target === 'left-electrode') {
+      if (item === 'beaker' && routedTarget === 'left-beaker') next.leftBeaker = true
+      else if (item === 'beaker' && routedTarget === 'right-beaker') next.rightBeaker = true
+      else if (item.startsWith('metal:') && routedTarget === 'left-electrode') {
         next.leftMetal = item.slice(6) as MetalId
         next.leftPolished = false
-      } else if (item.startsWith('metal:') && target === 'right-electrode') {
+      } else if (item.startsWith('metal:') && routedTarget === 'right-electrode') {
         next.rightMetal = item.slice(6) as MetalId
         next.rightPolished = false
-      } else if (item.startsWith('solution:') && target === 'left-solution' && next.leftBeaker) {
+      } else if (item.startsWith('solution:') && routedTarget === 'left-solution' && next.leftBeaker) {
         next.leftSolution = item.slice(9) as SolutionId
-      } else if (item.startsWith('solution:') && target === 'right-solution' && next.rightBeaker) {
+      } else if (item.startsWith('solution:') && routedTarget === 'right-solution' && next.rightBeaker) {
         next.rightSolution = item.slice(9) as SolutionId
-      } else if (item === 'wire' && target === 'circuit') next.wire = true
-      else if (item === 'meter' && target === 'circuit') next.meter = true
-      else if (item.startsWith('bridge:') && target === 'bridge') {
+      } else if (item === 'wire' && routedTarget === 'circuit') next.wire = true
+      else if (item === 'meter' && routedTarget === 'circuit') next.meter = true
+      else if (item.startsWith('bridge:') && routedTarget === 'bridge') {
         next.bridge = item.slice(7) as SaltBridgeElectrolyte
-      } else if (item === 'sandpaper' && target === 'left-electrode' && next.leftMetal) {
+      } else if (item === 'sandpaper' && routedTarget === 'left-electrode' && next.leftMetal) {
         next.leftPolished = true
-      } else if (item === 'sandpaper' && target === 'right-electrode' && next.rightMetal) {
+      } else if (item === 'sandpaper' && routedTarget === 'right-electrode' && next.rightMetal) {
         next.rightPolished = true
       }
       return next
