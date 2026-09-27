@@ -146,8 +146,9 @@ const text = {
     stop: 'Open switch',
     progress: 'assembly complete',
     evidence: 'Rule-engine diagnosis',
-    ready: 'Cell ready. Close the switch and compare your prediction with the meter.',
+    ready: 'Cell ready. Compare your predicted polarity and magnitude with the meter.',
     incomplete: 'The circuit is incomplete. Check every dashed drop zone.',
+    openSwitch: 'The apparatus is complete. Close the switch to measure Ecell.',
     mismatch: 'A metal electrode is not immersed in a solution containing its own ions.',
     oxide: 'An oxide layer blocks effective electrical contact. Polish both electrodes.',
     precipitate: 'Cl⁻ forms a precipitate with Ag⁺ or Pb²⁺ and blocks the ionic pathway.',
@@ -235,8 +236,9 @@ const text = {
     stop: '断开开关',
     progress: '装置完成度',
     evidence: '规则引擎诊断',
-    ready: '装置已完整。闭合开关，把预测值和电压表读数比较。',
+    ready: '装置已完整。把预测的正负极和数值与电压表读数比较。',
     incomplete: '电路不完整，请检查所有虚线投放区。',
+    openSwitch: '装置已搭完。闭合开关即可测量 Ecell。',
     mismatch: '金属电极没有浸在含有其自身离子的溶液中。',
     oxide: '氧化层妨碍有效电接触，请先打磨两个电极。',
     precipitate: 'Cl⁻ 与 Ag⁺ 或 Pb²⁺ 形成沉淀，堵塞内部离子通路。',
@@ -324,8 +326,9 @@ const text = {
     stop: 'Ouvrir le circuit',
     progress: 'montage complet',
     evidence: 'Diagnostic du moteur',
-    ready: 'Pile prête. Fermez le circuit et comparez votre prévision à la mesure.',
+    ready: 'Pile prête. Comparez polarité et grandeur prévues à la mesure.',
     incomplete: 'Circuit incomplet. Vérifiez chaque zone en pointillés.',
+    openSwitch: 'Le montage est complet. Fermez le circuit pour mesurer Ecell.',
     mismatch: 'Une électrode ne baigne pas dans une solution contenant ses propres ions.',
     oxide: 'Une couche d’oxyde gêne le contact. Polissez les deux électrodes.',
     precipitate: 'Cl⁻ précipite avec Ag⁺ ou Pb²⁺ et bloque la voie ionique.',
@@ -458,7 +461,7 @@ export function BatteryLabBuilder() {
   const cathodeMetal = result.cathodeSide ? labState[result.cathodeSide].metal : null
 
   const diagnosis = useMemo(() => {
-    if (result.fault === 'incomplete-circuit') return c.incomplete
+    if (result.fault === 'incomplete-circuit') return apparatusReady ? c.openSwitch : c.incomplete
     if (result.fault === 'incompatible-half-cell') return c.mismatch
     if (result.fault === 'oxide-layer') return c.oxide
     if (result.fault === 'salt-bridge-precipitate') return c.precipitate
@@ -466,7 +469,7 @@ export function BatteryLabBuilder() {
     if (result.fault === 'same-metal') return c.same
     if (operating && assembly.meterReversed) return c.reversed
     return c.ready
-  }, [assembly.meterReversed, c, operating, result.fault])
+  }, [apparatusReady, assembly.meterReversed, c, operating, result.fault])
 
   const practice = useMemo(
     () => makePractice(locale, result, assembly, anodeMetal, cathodeMetal),
@@ -597,7 +600,7 @@ export function BatteryLabBuilder() {
                 <div className="builder-sliders">
                   <label><span>{leftSolution?.formula ?? '—'} {c.concentration}<b>{leftConcentration.toFixed(1)} M</b></span><input type="range" min=".1" max="2" step=".1" value={leftConcentration} onChange={(event) => { setLeftConcentration(Number(event.target.value)); setRunning(false) }} /></label>
                   <label><span>{rightSolution?.formula ?? '—'} {c.concentration}<b>{rightConcentration.toFixed(1)} M</b></span><input type="range" min=".1" max="2" step=".1" value={rightConcentration} onChange={(event) => { setRightConcentration(Number(event.target.value)); setRunning(false) }} /></label>
-                  <button type="button" className={assembly.meterReversed ? 'is-reversed' : ''} disabled={!assembly.meter} onClick={() => { setAssembly((x) => ({ ...x, meterReversed: !x.meterReversed })); setRunning(false); resetQuestion() }}>± {assembly.meterReversed ? c.reverseLeads : c.normalLeads}<small>{c.reverse}</small></button>
+                  <button type="button" className={assembly.meterReversed ? 'is-reversed' : ''} disabled={!assembly.meter} onClick={() => { setAssembly((x) => ({ ...x, meterReversed: !x.meterReversed })); resetQuestion() }}>± {assembly.meterReversed ? c.reverseLeads : c.normalLeads}<small>{c.reverse}</small></button>
                   <button type="button" className={`builder-run ${operating ? 'is-running' : ''}`} onClick={() => setRunning((x) => !x)}>{operating ? `■ ${c.stop}` : `▶ ${c.run}`}</button>
                 </div>
               </div>
