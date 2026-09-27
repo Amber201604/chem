@@ -388,32 +388,40 @@
   min-width: 0;
   height: 330px;
   position: relative;
+  border-radius: 8px 8px 32px 32px;
 }
 
-.beaker-drop {
-  width: 100%;
-  height: 238px;
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  border-radius: 5px 5px 32px 32px;
+.builder-half-cell.has-item {
+  border-style: solid;
+  border-color: rgba(143, 177, 181, 0.18);
+  background: transparent;
 }
 
 .builder-beaker {
-  width: 100%;
-  height: 100%;
-  position: relative;
+  width: calc(100% - 16px);
+  height: 238px;
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
   overflow: hidden;
   border: 3px solid #758f95;
   border-top: 0;
   border-radius: 4px 4px 30px 30px;
   background: rgba(145, 185, 193, 0.025);
+  pointer-events: none;
 }
 
 .builder-beaker > button,
 .builder-electrode > button,
 .builder-bridge > button,
-.solution-drop strong > button {
+.builder-solution-chip > button {
+  pointer-events: auto;
+}
+
+.builder-beaker > button,
+.builder-electrode > button,
+.builder-bridge > button,
+.builder-solution-chip > button {
   position: absolute;
   z-index: 5;
   width: 18px;
@@ -452,25 +460,19 @@
   white-space: nowrap;
 }
 
-.electrode-drop {
+.builder-electrode {
   width: 66px;
   height: 235px;
   position: absolute;
   z-index: 3;
   left: 50%;
   bottom: 20px;
-  transform: translateX(-50%);
-  border-radius: 7px;
-}
-
-.builder-electrode {
-  width: 100%;
-  height: 100%;
-  position: relative;
+  pointer-events: none;
   display: grid;
   place-items: start center;
   align-content: center;
   gap: 8px;
+  transform: translateX(-50%);
   border: 2px solid color-mix(in srgb, var(--metal-color) 78%, white);
   border-radius: 5px;
   background: var(--metal-color);
@@ -503,30 +505,21 @@
   top: 3px;
 }
 
-.solution-drop {
-  width: calc(100% - 8px);
-  height: 42px;
+.builder-solution-chip {
   position: absolute;
   z-index: 4;
-  left: 4px;
-  bottom: 4px;
-  border-radius: 6px 6px 24px 24px;
-}
-
-.solution-drop.has-item {
-  border: 0;
-  background: transparent;
-}
-
-.solution-drop strong {
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
   color: white;
   font-family: var(--mono);
   font-size: 0.53rem;
+  pointer-events: none;
 }
 
-.solution-drop strong > button {
-  right: 2px;
-  bottom: 2px;
+.builder-solution-chip > button {
+  right: -18px;
+  bottom: 0;
 }
 
 .bridge-drop {

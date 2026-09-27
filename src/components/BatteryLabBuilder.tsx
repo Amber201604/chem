@@ -27,15 +27,7 @@ type ItemId =
   | `metal:${MetalId}`
   | `solution:${SolutionId}`
   | `bridge:${SaltBridgeElectrolyte}`
-type DropTarget =
-  | 'left-beaker'
-  | 'right-beaker'
-  | 'left-electrode'
-  | 'right-electrode'
-  | 'left-solution'
-  | 'right-solution'
-  | 'circuit'
-  | 'bridge'
+type DropTarget = 'left' | 'right' | 'circuit' | 'bridge'
 type ViewMode = 'macro' | 'micro'
 type TutorTab = 'coach' | 'practice'
 type Message = { role: 'tutor' | 'student'; text: string }
@@ -110,6 +102,8 @@ const METAL_ION: Record<MetalId, string> = {
   Pb: 'Pb²⁺',
 }
 
+let dragPayload: ItemId | null = null
+
 const text = {
   en: {
     eyebrow: 'AP CHEMISTRY · UNIT 9 · OPEN LAB',
@@ -138,9 +132,7 @@ const text = {
     nonstandard: 'Nernst-adjusted',
     bench: 'Assembly bench',
     dropCircuit: 'Drop wire + voltmeter here',
-    dropBeaker: 'Drop a beaker',
-    dropMetal: 'Drop metal electrode',
-    dropSolution: 'Pour a solution',
+    dropHalf: 'Drop beaker, metal, solution, or sandpaper here',
     dropBridge: 'Drop salt bridge',
     unpolished: 'oxidized surface',
     polished: 'polished',
@@ -229,9 +221,7 @@ const text = {
     nonstandard: '能斯特修正',
     bench: '实验搭建台',
     dropCircuit: '把导线和电压表拖到这里',
-    dropBeaker: '放置烧杯',
-    dropMetal: '放入金属电极',
-    dropSolution: '倒入溶液',
+    dropHalf: '把烧杯、电极、溶液或砂纸放到这一侧',
     dropBridge: '放置盐桥',
     unpolished: '表面有氧化层',
     polished: '已打磨',
@@ -320,9 +310,7 @@ const text = {
     nonstandard: 'corrigé par Nernst',
     bench: 'Banc de montage',
     dropCircuit: 'Déposer fil + voltmètre',
-    dropBeaker: 'Déposer un bécher',
-    dropMetal: 'Déposer une électrode',
-    dropSolution: 'Verser une solution',
+    dropHalf: 'Déposer bécher, métal, solution ou papier ici',
     dropBridge: 'Déposer un pont salin',
     unpolished: 'surface oxydée',
     polished: 'polie',
@@ -493,52 +481,37 @@ export function BatteryLabBuilder() {
   const placeItem = (item: ItemId, target: DropTarget) => {
     setRunning(false)
     resetQuestion()
-    const side = target.startsWith('left-')
-      ? 'left'
-      : target.startsWith('right-')
-        ? 'right'
-        : null
-    const routedTarget: DropTarget =
-      item === 'beaker' && side
-        ? `${side}-beaker`
-        : item.startsWith('metal:') && side
-          ? `${side}-electrode`
-          : item.startsWith('solution:') && side
-            ? `${side}-solution`
-            : item === 'sandpaper' && side
-              ? `${side}-electrode`
-              : target
     setAssembly((current) => {
       const next = { ...current }
-      if (item === 'beaker' && routedTarget === 'left-beaker') next.leftBeaker = true
-      else if (item === 'beaker' && routedTarget === 'right-beaker') next.rightBeaker = true
-      else if (item.startsWith('metal:') && routedTarget === 'left-electrode') {
-        next.leftMetal = item.slice(6) as MetalId
-        next.leftPolished = false
-      } else if (item.startsWith('metal:') && routedTarget === 'right-electrode') {
-        next.rightMetal = item.slice(6) as MetalId
-        next.rightPolished = false
-      } else if (item.startsWith('solution:') && routedTarget === 'left-solution' && next.leftBeaker) {
-        next.leftSolution = item.slice(9) as SolutionId
-      } else if (item.startsWith('solution:') && routedTarget === 'right-solution' && next.rightBeaker) {
-        next.rightSolution = item.slice(9) as SolutionId
-      } else if (item === 'wire' && routedTarget === 'circuit') next.wire = true
-      else if (item === 'meter' && routedTarget === 'circuit') next.meter = true
-      else if (item.startsWith('bridge:') && routedTarget === 'bridge') {
+      const side = target === 'left' || target === 'right' ? target : null
+      if (item === 'beaker' && side) next[`${side}Beaker`] = true
+      else if (item.startsWith('metal:') && side) {
+        next[`${side}Metal`] = item.slice(6) as MetalId
+        next[`${side}Polished`] = false
+        next[`${side}Beaker`] = true
+      } else if (item.startsWith('solution:') && side) {
+        next[`${side}Beaker`] = true
+        next[`${side}Solution`] = item.slice(9) as SolutionId
+      } else if (item === 'sandpaper' && side && next[`${side}Metal`]) {
+        next[`${side}Polished`] = true
+      } else if (item === 'wire' && target === 'circuit') next.wire = true
+      else if (item === 'meter' && target === 'circuit') next.meter = true
+      else if ((item === 'wire' || item === 'meter') && !side) {
+        if (item === 'wire') next.wire = true
+        if (item === 'meter') next.meter = true
+      } else if (item.startsWith('bridge:')) {
         next.bridge = item.slice(7) as SaltBridgeElectrolyte
-      } else if (item === 'sandpaper' && routedTarget === 'left-electrode' && next.leftMetal) {
-        next.leftPolished = true
-      } else if (item === 'sandpaper' && routedTarget === 'right-electrode' && next.rightMetal) {
-        next.rightPolished = true
       }
       return next
     })
     setSelectedItem(null)
+    dragPayload = null
   }
 
   const drop = (event: DragEvent, target: DropTarget) => {
     event.preventDefault()
-    const item = event.dataTransfer.getData('text/plain') as ItemId
+    event.stopPropagation()
+    const item = (dragPayload ?? event.dataTransfer.getData('text/plain')) as ItemId
     if (item) placeItem(item, target)
   }
 
@@ -603,14 +576,24 @@ export function BatteryLabBuilder() {
                   selectedItem={selectedItem}
                   onDrop={drop}
                   onTarget={clickTarget}
-                  onRemove={(key) => { setAssembly((x) => ({ ...x, [key]: key.includes('Polished') || key.includes('Beaker') || key === 'wire' || key === 'meter' ? false : null })); setRunning(false) }}
+                  onRemove={(key) => {
+                    setAssembly((current) => {
+                      const next = { ...current, [key]: key.includes('Polished') || key.includes('Beaker') || key === 'wire' || key === 'meter' ? false : null }
+                      if (key === 'leftBeaker') next.leftSolution = null
+                      if (key === 'rightBeaker') next.rightSolution = null
+                      if (key === 'leftMetal') next.leftPolished = false
+                      if (key === 'rightMetal') next.rightPolished = false
+                      return next
+                    })
+                    setRunning(false)
+                  }}
                 />
               ) : (
                 <ParticleView c={c} assembly={assembly} result={result} leftSolution={leftSolution} rightSolution={rightSolution} running={operating} />
               )}
 
               <div className="builder-config">
-                <div className="builder-config__head"><strong>{c.bench}</strong><span>{readyParts}/9 {c.progress}</span></div>
+                <div className="builder-config__head"><strong>{c.bench}</strong><span>{readyParts}/9 {c.progress}{assembly.leftPolished && assembly.rightPolished ? ' · ✓' : ` · ${c.sandHint}`}</span></div>
                 <div className="builder-sliders">
                   <label><span>{leftSolution?.formula ?? '—'} {c.concentration}<b>{leftConcentration.toFixed(1)} M</b></span><input type="range" min=".1" max="2" step=".1" value={leftConcentration} onChange={(event) => { setLeftConcentration(Number(event.target.value)); setRunning(false) }} /></label>
                   <label><span>{rightSolution?.formula ?? '—'} {c.concentration}<b>{rightConcentration.toFixed(1)} M</b></span><input type="range" min=".1" max="2" step=".1" value={rightConcentration} onChange={(event) => { setRightConcentration(Number(event.target.value)); setRunning(false) }} /></label>
@@ -657,14 +640,25 @@ type ShelfCopy = (typeof text)[keyof typeof text]
 
 function ApparatusShelf({ c, selected, onSelect, onClear, onPreset }: { c: ShelfCopy; selected: ItemId | null; onSelect: (item: ItemId) => void; onClear: () => void; onPreset: () => void }) {
   const item = (id: ItemId, icon: string, label: string, sub?: string) => (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       draggable
       className={`shelf-item ${selected === id ? 'is-selected' : ''}`}
-      onDragStart={(event) => event.dataTransfer.setData('text/plain', id)}
+      onDragStart={(event) => {
+        dragPayload = id
+        event.dataTransfer.setData('text/plain', id)
+        event.dataTransfer.effectAllowed = 'copy'
+      }}
+      onDragEnd={() => {
+        dragPayload = null
+      }}
       onClick={() => onSelect(id)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') onSelect(id)
+      }}
       key={id}
-    ><i>{icon}</i><span><strong>{label}</strong>{sub && <small>{sub}</small>}</span><em>⋮⋮</em></button>
+    ><i>{icon}</i><span><strong>{label}</strong>{sub && <small>{sub}</small>}</span><em>⋮⋮</em></div>
   )
   return (
     <aside className="apparatus-shelf">
@@ -679,35 +673,55 @@ function ApparatusShelf({ c, selected, onSelect, onClear, onPreset }: { c: Shelf
   )
 }
 
+function hasVisibleChild(children: ReactNode) {
+  return [children].flat().some((child) => Boolean(child))
+}
+
 function DropZone({ target, label, selected, className = '', onDrop, onTarget, children }: { target: DropTarget; label: string; selected: ItemId | null; className?: string; onDrop: (event: DragEvent, target: DropTarget) => void; onTarget: (target: DropTarget) => void; children?: ReactNode }) {
+  const occupied = hasVisibleChild(children)
   return (
     <div
       role="button"
       tabIndex={0}
-      className={`builder-drop-zone ${children ? 'has-item' : ''} ${selected ? 'is-awaiting' : ''} ${className}`}
-      onDragOver={(event) => event.preventDefault()}
+      className={`builder-drop-zone ${occupied ? 'has-item' : ''} ${selected ? 'is-awaiting' : ''} ${className}`}
+      onDragOver={(event) => {
+        event.preventDefault()
+        event.dataTransfer.dropEffect = 'copy'
+      }}
       onDrop={(event) => onDrop(event, target)}
       onClick={() => onTarget(target)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') onTarget(target)
       }}
     >
-      {children ?? <span>＋<small>{label}</small></span>}
+      {occupied ? children : <span>＋<small>{label}</small></span>}
     </div>
   )
 }
 
 function Workbench({ c, assembly, result, running, leftSolution, rightSolution, selectedItem, onDrop, onTarget, onRemove }: { c: ShelfCopy; assembly: Assembly; result: ChemistryResult; running: boolean; leftSolution: (typeof SOLUTIONS)[SolutionId] | null; rightSolution: (typeof SOLUTIONS)[SolutionId] | null; selectedItem: ItemId | null; onDrop: (event: DragEvent, target: DropTarget) => void; onTarget: (target: DropTarget) => void; onRemove: (key: keyof Assembly) => void }) {
   const half = (side: CellSide, beaker: boolean, metal: MetalId | null, solution: (typeof SOLUTIONS)[SolutionId] | null, polished: boolean) => (
-    <div className={`builder-half-cell side-${side}`}>
-      <DropZone target={`${side}-beaker`} label={c.dropBeaker} selected={selectedItem} onDrop={onDrop} onTarget={onTarget} className="beaker-drop">
-        {beaker ? <div className="builder-beaker"><button type="button" onClick={(event) => { event.stopPropagation(); onRemove(`${side}Beaker` as keyof Assembly) }}>×</button>{solution && <div className="builder-liquid" style={{ backgroundColor: solution.color }}><span>{solution.formula}(aq)</span></div>}</div> : undefined}
-      </DropZone>
-      <DropZone target={`${side}-solution`} label={c.dropSolution} selected={selectedItem} onDrop={onDrop} onTarget={onTarget} className="solution-drop">{solution ? <strong>{solution.formula}<button type="button" onClick={(event) => { event.stopPropagation(); onRemove(`${side}Solution` as keyof Assembly) }}>×</button></strong> : undefined}</DropZone>
-      <DropZone target={`${side}-electrode`} label={metal ? c.sandHint : c.dropMetal} selected={selectedItem} onDrop={onDrop} onTarget={onTarget} className="electrode-drop">
-        {metal ? <div className={`builder-electrode ${polished ? 'is-polished' : 'is-oxidized'}`} style={{ '--metal-color': METAL_COLOR[metal] } as CSSProperties}><b>{metal}</b><small>{polished ? `✓ ${c.polished}` : `! ${c.unpolished}`}</small><button type="button" onClick={(event) => { event.stopPropagation(); onRemove(`${side}Metal` as keyof Assembly) }}>×</button></div> : undefined}
-      </DropZone>
-    </div>
+    <DropZone target={side} label={c.dropHalf} selected={selectedItem} onDrop={onDrop} onTarget={onTarget} className={`builder-half-cell side-${side}`}>
+      {beaker && (
+        <div className="builder-beaker">
+          <button type="button" onClick={(event) => { event.stopPropagation(); onRemove(`${side}Beaker` as keyof Assembly) }}>×</button>
+          {solution && <div className="builder-liquid" style={{ backgroundColor: solution.color }}><span>{solution.formula}(aq)</span></div>}
+        </div>
+      )}
+      {solution && (
+        <strong className="builder-solution-chip">
+          {solution.formula}
+          <button type="button" onClick={(event) => { event.stopPropagation(); onRemove(`${side}Solution` as keyof Assembly) }}>×</button>
+        </strong>
+      )}
+      {metal && (
+        <div className={`builder-electrode ${polished ? 'is-polished' : 'is-oxidized'}`} style={{ '--metal-color': METAL_COLOR[metal] } as CSSProperties}>
+          <b>{metal}</b>
+          <small>{polished ? `✓ ${c.polished}` : `! ${c.unpolished}`}</small>
+          <button type="button" onClick={(event) => { event.stopPropagation(); onRemove(`${side}Metal` as keyof Assembly) }}>×</button>
+        </div>
+      )}
+    </DropZone>
   )
   return (
     <div className="assembly-stage">
