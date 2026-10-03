@@ -1,4 +1,5 @@
 import { Canvas } from '@react-three/fiber'
+import { PCFShadowMap } from 'three'
 import {
   ContactShadows,
   Environment,
@@ -194,7 +195,7 @@ export function BalanceScene(props: SceneProps) {
   return (
     <div className="scene-shell">
       <Canvas
-        shadows
+        shadows={{ type: PCFShadowMap }}
         camera={{ position: [0, 2.6, 6.2], fov: 42 }}
         dpr={[1, 1.75]}
       >
