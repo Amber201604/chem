@@ -19,5 +19,11 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "server/**/*.ts",
+    "api/**/*.ts",
+    "src/learning/types.ts",
+    "src/learning/catalog.ts"
+  ]
 }

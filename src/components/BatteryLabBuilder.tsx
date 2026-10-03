@@ -3,9 +3,10 @@ import {
   useState,
   type CSSProperties,
   type DragEvent,
-  type FormEvent,
   type ReactNode,
 } from 'react'
+import { ScaffoldCoach } from './ScaffoldCoach'
+import type { LabSnapshot } from '../learning/types.ts'
 import {
   DEFAULT_DANIELL_STATE,
   METALS,
@@ -29,8 +30,6 @@ type ItemId =
   | `bridge:${SaltBridgeElectrolyte}`
 type DropTarget = 'left' | 'right' | 'circuit' | 'bridge'
 type ViewMode = 'macro' | 'micro'
-type TutorTab = 'coach' | 'practice'
-type Message = { role: 'tutor' | 'student'; text: string }
 
 type Assembly = {
   leftBeaker: boolean
@@ -163,7 +162,7 @@ const text = {
     particleNote: 'Representative particles only · not count, path, speed, or scale',
     returnBuild: 'Return to Build view to change apparatus.',
     tutor: 'AI Lab Coach',
-    tutorSub: 'Socratic · reads this exact setup',
+    tutorSub: 'Guarded scaffold · Terra / Gemini',
     coach: 'Coach',
     practice: 'AP Practice',
     welcome: 'Build a cell first. Which two independent charge pathways must both be complete?',
@@ -253,7 +252,7 @@ const text = {
     particleNote: '仅为代表性粒子 · 不表示真实数量、路径、速度或尺度',
     returnBuild: '返回搭建视图可以更换器材。',
     tutor: 'AI 实验导师',
-    tutorSub: '苏格拉底式 · 读取当前装置',
+    tutorSub: '受保护脚手架 · Terra / Gemini',
     coach: '导师',
     practice: 'AP 练习',
     welcome: '先搭建电池：哪两条彼此独立的电荷通路必须同时完整？',
@@ -343,7 +342,7 @@ const text = {
     particleNote: 'Particules représentatives · ni quantité, trajet, vitesse ou échelle réels',
     returnBuild: 'Revenez à la vue montage pour changer le matériel.',
     tutor: 'Coach IA',
-    tutorSub: 'Socratique · lit ce montage exact',
+    tutorSub: 'Échafaudage protégé · Terra / Gemini',
     coach: 'Coach',
     practice: 'Exercice AP',
     welcome: 'Construisez une pile. Quelles deux voies de charge doivent être complètes ?',
@@ -398,13 +397,6 @@ export function BatteryLabBuilder() {
   const [rightConcentration, setRightConcentration] = useState(1)
   const [running, setRunning] = useState(false)
   const [view, setView] = useState<ViewMode>('macro')
-  const [tab, setTab] = useState<TutorTab>('coach')
-  const [messages, setMessages] = useState<Message[]>([{ role: 'tutor', text: c.welcome }])
-  const [draft, setDraft] = useState('')
-  const [teacherOpen, setTeacherOpen] = useState(false)
-  const [misconception, setMisconception] = useState('')
-  const [level, setLevel] = useState('intermediate')
-  const [contextApplied, setContextApplied] = useState(false)
   const [answer, setAnswer] = useState('')
   const [checked, setChecked] = useState(false)
 
@@ -529,22 +521,31 @@ export function BatteryLabBuilder() {
     setChecked(false)
   }
 
-  const askTutor = (question: string) => {
-    let response: string = c.genericPrompt
-    if (result.fault === 'incomplete-circuit') response = c.missingPrompt
-    else if (result.fault === 'incompatible-half-cell') response = c.mismatchPrompt
-    else if (result.fault === 'oxide-layer') response = c.oxidePrompt
-    else if (result.fault === 'salt-bridge-precipitate') response = c.precipPrompt
-    else if (assembly.meterReversed || question.toLowerCase().includes('negative') || question.includes('负')) response = c.reversePrompt
-    if (contextApplied && misconception.trim()) response = `${response} (${c.misconception}: ${misconception.trim()})`
-    setMessages((current) => [...current, { role: 'student', text: question }, { role: 'tutor', text: response }])
-    setDraft('')
-  }
-
-  const submit = (event: FormEvent) => {
-    event.preventDefault()
-    if (draft.trim()) askTutor(draft.trim())
-  }
+  const labSnapshot = useMemo<LabSnapshot>(
+    () => ({
+      leftMetal: assembly.leftMetal,
+      rightMetal: assembly.rightMetal,
+      leftSolution: assembly.leftSolution,
+      rightSolution: assembly.rightSolution,
+      bridge: assembly.bridge,
+      wire: assembly.wire,
+      meter: assembly.meter,
+      leftPolished: assembly.leftPolished,
+      rightPolished: assembly.rightPolished,
+      meterReversed: assembly.meterReversed,
+      leftConcentration,
+      rightConcentration,
+      running,
+      fault: result.fault,
+      emf: result.EMF,
+      reactionType: result.reactionType,
+      electronFlow: result.electronFlowDirection,
+      anodeMetal,
+      cathodeMetal,
+      view,
+    }),
+    [anodeMetal, assembly, cathodeMetal, leftConcentration, result, rightConcentration, running, view],
+  )
 
   return (
     <section className="builder-lab">
@@ -614,26 +615,45 @@ export function BatteryLabBuilder() {
           </div>
         </main>
 
-        <aside className="builder-tutor panel">
-          <header><div className="builder-ai">AI</div><div><h3>{c.tutor}</h3><p><i /> {c.tutorSub}</p></div><button type="button" onClick={() => setTeacherOpen((x) => !x)}>⚙</button></header>
-          {teacherOpen && <div className="builder-teacher"><strong>{c.teacher}</strong><label>{c.misconception}<textarea value={misconception} placeholder={c.misconceptionPlaceholder} onChange={(event) => { setMisconception(event.target.value); setContextApplied(false) }} /></label><label>{c.level}<select value={level} onChange={(event) => { setLevel(event.target.value); setContextApplied(false) }}><option value="novice">{c.novice}</option><option value="intermediate">{c.intermediate}</option><option value="exam">{c.exam}</option></select></label><button type="button" onClick={() => setContextApplied(true)}>{contextApplied ? `✓ ${c.applied}` : c.apply}</button></div>}
-          <nav><button type="button" className={tab === 'coach' ? 'is-active' : ''} onClick={() => setTab('coach')}>{c.coach}</button><button type="button" className={tab === 'practice' ? 'is-active' : ''} onClick={() => setTab('practice')}>{c.practice}</button></nav>
-          {tab === 'coach' ? (
-            <>
-              <div className="builder-chat">{messages.map((message, index) => <div className={`builder-message is-${message.role}`} key={`${message.role}-${index}`}>{message.role === 'tutor' && <b>AI</b>}<p>{message.text}</p></div>)}</div>
-              <div className="builder-quick">{[c.quickZero, c.quickSign, c.quickBridge].map((question) => <button type="button" key={question} onClick={() => askTutor(question)}>{question}</button>)}</div>
-              <form className="builder-chatbox" onSubmit={submit}><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={c.input} /><button type="submit" disabled={!draft.trim()} aria-label={c.send}>↑</button></form>
-            </>
-          ) : (
+        <ScaffoldCoach
+          locale={locale}
+          c={c}
+          lab={labSnapshot}
+          view={view}
+          onInspect={() => setView('micro')}
+          practice={
             <div className="builder-practice">
-              <span>{c.generated}</span><h3>{c.practiceTitle}</h3><p>{practice.question}</p>
-              <div>{practice.options.map((option, index) => { const key = String.fromCharCode(97 + index); return <button type="button" className={answer === key ? 'is-selected' : ''} onClick={() => { setAnswer(key); setChecked(false) }} key={key}>{String.fromCharCode(65 + index)}. {option}</button> })}</div>
-              <button type="button" className="builder-check" disabled={!answer} onClick={() => setChecked(true)}>{c.check}</button>
+              <span>{c.generated}</span>
+              <h3>{c.practiceTitle}</h3>
+              <p>{practice.question}</p>
+              <div>
+                {practice.options.map((option, index) => {
+                  const key = String.fromCharCode(97 + index)
+                  return (
+                    <button
+                      type="button"
+                      className={answer === key ? 'is-selected' : ''}
+                      onClick={() => {
+                        setAnswer(key)
+                        setChecked(false)
+                      }}
+                      key={key}
+                    >
+                      {String.fromCharCode(65 + index)}. {option}
+                    </button>
+                  )
+                })}
+              </div>
+              <button type="button" className="builder-check" disabled={!answer} onClick={() => setChecked(true)}>
+                {c.check}
+              </button>
               {checked && <aside className={answer === practice.correct ? 'is-correct' : ''}>{answer === practice.correct ? practice.feedback : c.retry}</aside>}
-              <a href="https://apcentral.collegeboard.org/courses/ap-chemistry/exam/past-exam-questions" target="_blank" rel="noreferrer">{c.official}</a>
+              <a href="https://apcentral.collegeboard.org/courses/ap-chemistry/exam/past-exam-questions" target="_blank" rel="noreferrer">
+                {c.official}
+              </a>
             </div>
-          )}
-        </aside>
+          }
+        />
       </div>
     </section>
   )
