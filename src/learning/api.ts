@@ -47,3 +47,52 @@ export async function exportLearningLog(pin?: string) {
   link.click()
   URL.revokeObjectURL(url)
 }
+
+export type SftCatalogPayload = {
+  modelName: string
+  trainedOnDevice: string
+  numDialogues: number
+  vocabSize: number
+  embeddingDim: number
+  trainingMetrics: Array<{
+    epoch: number
+    loss: number
+    dialogue_acc: number
+    barrier_acc: number
+  }>
+  summary: {
+    total_sft_dialogues: number
+    curated_research_dialogues: number
+    hf_socratic_dialogues: number
+    hf_chemconcepts_scaffolded: number
+    total_dpo_pairs: number
+    sources: Array<{
+      id: string
+      url: string
+      type: string
+      role: string
+    }>
+  } | null
+  exemplars: Array<{
+    id: string
+    source: string
+    curriculum: string
+    topic: string
+    questionKey: string
+    barrier: string
+    sampleQuestion: string
+    supportLadder: [string, string, string, string]
+    messages: Array<{
+      role: 'user' | 'assistant'
+      content: string
+      phase?: string
+      supportLevel?: number
+    }>
+  }>
+}
+
+export async function fetchSftCatalog(): Promise<SftCatalogPayload> {
+  const response = await fetch('/api/learning?format=sft')
+  if (!response.ok) throw new Error('Could not load SFT catalog')
+  return (await response.json()) as SftCatalogPayload
+}

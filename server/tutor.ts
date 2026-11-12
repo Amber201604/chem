@@ -5,6 +5,7 @@ import type { QuestionAskStat, TutorOutput, TutorRequest } from '../src/learning
 import { gatewayApiKey, gatewayStatus } from './env.ts'
 import { localScaffold } from './fixedScaffold.ts'
 import { buildTutorSystemPrompt } from './prompt.ts'
+import { runTrainedSftTutor } from './sftEngine.ts'
 import { appendEvent, readEvents } from './store.ts'
 
 const outputSchema = z.object({
@@ -135,8 +136,10 @@ export async function runTutor(input: TutorRequest): Promise<TutorOutput> {
   let result: TutorOutput
   if (input.condition === 'fixed') {
     result = { ...localScaffold({ ...input, questionKey }, supportLevel), fallbackReason: 'fixed' }
+  } else if (input.model === 'sft-chem-scaffold') {
+    result = runTrainedSftTutor({ ...input, questionKey }, supportLevel)
   } else if (!status.configured) {
-    result = { ...localScaffold({ ...input, questionKey }, supportLevel), fallbackReason: 'no-key' }
+    result = { ...runTrainedSftTutor({ ...input, questionKey }, supportLevel), fallback: true, fallbackReason: 'no-key' }
   } else {
     try {
       result = await generateAdaptive({ ...input, questionKey, supportLevel }, history)
@@ -144,7 +147,8 @@ export async function runTutor(input: TutorRequest): Promise<TutorOutput> {
       const errorMessage = error instanceof Error ? error.message : 'Unknown gateway error'
       console.error('[tutor] gateway call failed', errorMessage)
       result = {
-        ...localScaffold({ ...input, questionKey }, supportLevel),
+        ...runTrainedSftTutor({ ...input, questionKey }, supportLevel),
+        fallback: true,
         fallbackReason: 'api-error',
         errorMessage,
       }

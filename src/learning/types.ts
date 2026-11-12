@@ -1,4 +1,5 @@
 export const MODEL_IDS = {
+  sft: 'sft-chem-scaffold',
   terra: 'openai/gpt-5.6-terra',
   flash: 'google/gemini-3.6-flash',
 } as const
@@ -99,6 +100,9 @@ export type TutorOutput = {
   fallback: boolean
   fallbackReason?: 'no-key' | 'api-error' | 'fixed'
   errorMessage?: string
+  matchedTopic?: string
+  matchedSource?: string
+  similarity?: number
 }
 
 export type LearningEvent = {

@@ -22,6 +22,12 @@ export const translations = {
     'nav.formulaDesc': 'Build ionic formulae in 3D',
     'nav.battery': 'How a battery works',
     'nav.batteryDesc': 'Assemble a Daniell cell',
+    'nav.scaffold': 'Scaffolding tutor',
+    'nav.scaffoldDesc': 'SFT Socratic chemistry Q&A',
+    'scaffold.title': '05.1 Scaffolding Tutor',
+    'scaffold.eyebrow': 'CANADIAN SCH3U/SCH4U & AP CHEMISTRY · SFT SOCRATIC TUTOR',
+    'scaffold.coreQuestion':
+      'Core question: How do we connect observable changes, particle interactions, and chemical equations through guided reasoning?',
     ...digestive.en,
     'nav.note': 'Select a lesson to enter its interactive laboratory.',
 
@@ -211,6 +217,12 @@ export const translations = {
     'nav.formulaDesc': '在 3D 模型中推导离子化学式',
     'nav.battery': '电池如何工作',
     'nav.batteryDesc': '组装一个丹尼尔电池',
+    'nav.scaffold': '脚手架问答导师',
+    'nav.scaffoldDesc': '高中/AP化学 SFT 苏格拉底问答',
+    'scaffold.title': '05.1 脚手架问答导师 (Scaffolding Tutor)',
+    'scaffold.eyebrow': '加拿大高中 SCH3U/SCH4U 与 AP 化学 · SFT 诊断式脚手架',
+    'scaffold.coreQuestion':
+      '核心问题：如何通过预测、微观粒子与符号表征的递进式追问独立解决化学问题？',
     ...digestive.zh,
     'nav.note': '选择课程，进入对应的互动实验室。',
 

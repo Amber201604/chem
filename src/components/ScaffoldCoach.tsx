@@ -60,6 +60,7 @@ const ui = {
     support: 'Support',
     supports: ['Question', 'Cue', 'Explicit', 'Unaided'] as const,
     model: 'Model',
+    sft: 'SFT Chem Scaffold (Trained Local)',
     terra: 'GPT-5.6 Terra',
     flash: 'Gemini 3.6 Flash',
     condition: 'Study condition',
@@ -109,6 +110,7 @@ const ui = {
     support: '支持层级',
     supports: ['提问', '线索', '更明确', '独立'] as const,
     model: '模型',
+    sft: 'SFT 化学脚手架模型（本地已训练）',
     terra: 'GPT-5.6 Terra',
     flash: 'Gemini 3.6 Flash',
     condition: '实验条件',
@@ -158,6 +160,7 @@ const ui = {
     support: 'Soutien',
     supports: ['Question', 'Indice', 'Explicite', 'Autonome'] as const,
     model: 'Modèle',
+    sft: 'Modèle SFT Chimie (Entraîné localement)',
     terra: 'GPT-5.6 Terra',
     flash: 'Gemini 3.6 Flash',
     condition: 'Condition',
@@ -418,6 +421,7 @@ export function ScaffoldCoach({ locale, c, lab, view, practice, onInspect }: Pro
                 setProfile((current) => ({ ...current, model: event.target.value as LearnerProfile['model'] }))
               }
             >
+              <option value={MODEL_IDS.sft}>{labels.sft}</option>
               <option value={MODEL_IDS.terra}>{labels.terra}</option>
               <option value={MODEL_IDS.flash}>{labels.flash}</option>
             </select>

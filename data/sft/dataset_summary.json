@@ -1,0 +1,39 @@
+{
+  "total_sft_dialogues": 182,
+  "curated_research_dialogues": 12,
+  "hf_socratic_dialogues": 70,
+  "hf_chemconcepts_scaffolded": 100,
+  "total_dpo_pairs": 48,
+  "sources": [
+    {
+      "id": "Susu11/socraticfinetune",
+      "url": "https://huggingface.co/datasets/Susu11/socraticfinetune",
+      "type": "Multi-turn Socratic Science Tutor SFT (3,240 dialogues)",
+      "role": "Teaches 1-question-per-turn Socratic scaffolding & never giving final answer directly"
+    },
+    {
+      "id": "Susu11/socratic_dpo_preference",
+      "url": "https://huggingface.co/datasets/Susu11/socratic_dpo_preference",
+      "type": "DPO Preference Pairs (3,501 chosen Socratic vs rejected direct answers)",
+      "role": "Penalizes direct answer dumping (Bastani et al., 2025 guardrail alignment)"
+    },
+    {
+      "id": "kd13/ChemistryConcepts-Instruct-v1",
+      "url": "https://huggingface.co/datasets/kd13/ChemistryConcepts-Instruct-v1",
+      "type": "High School & AP Chemistry Concepts SFT (15,041 rows across 303 topics)",
+      "role": "Covers SCH3U/SCH4U & AP Chemistry Units 1-9 with intuition, common mistakes, and notation"
+    },
+    {
+      "id": "DarthJudie/APChem",
+      "url": "https://huggingface.co/datasets/DarthJudie/APChem",
+      "type": "AP Chemistry Unit-by-Unit Corpus (73,274 rows)",
+      "role": "AP Chemistry curriculum alignment (Units 1-9 including Unit 7 Equilibrium & Unit 9 Electrochemistry)"
+    },
+    {
+      "id": "ulises-c/SocratDataset-SYNTHETIC-EN",
+      "url": "https://huggingface.co/datasets/ulises-c/SocratDataset-SYNTHETIC-EN",
+      "type": "State-tracked Socratic Teaching Dialogues (stages a1 -> e34)",
+      "role": "Explicit pedagogical state transitions & diagnostic evaluation per student turn"
+    }
+  ]
+}

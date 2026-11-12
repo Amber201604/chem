@@ -4,6 +4,7 @@ import { InputConsole } from './components/InputConsole'
 import { BalanceChamber } from './components/BalanceChamber'
 import { BatteryLabBuilder } from './components/BatteryLabBuilder'
 import { DigestiveLab } from './components/DigestiveLab'
+import { ScaffoldingTutorLab } from './components/ScaffoldingTutorLab'
 import {
   CourseSidebar,
   type CourseId,
@@ -145,11 +146,17 @@ function AppShell() {
             subtitle: t('battery.eyebrow'),
             question: t('battery.intro'),
           }
-        : {
-            title: t('digest.title'),
-            subtitle: t('digest.eyebrow'),
-            question: t('digest.coreQuestion'),
-          }
+        : activeCourse === 'scaffold'
+          ? {
+              title: t('scaffold.title'),
+              subtitle: t('scaffold.eyebrow'),
+              question: t('scaffold.coreQuestion'),
+            }
+          : {
+              title: t('digest.title'),
+              subtitle: t('digest.eyebrow'),
+              question: t('digest.coreQuestion'),
+            }
 
   return (
     <div className={`course-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -202,6 +209,8 @@ function AppShell() {
           <FormulaCourse />
         ) : activeCourse === 'battery' ? (
           <BatteryLabBuilder />
+        ) : activeCourse === 'scaffold' ? (
+          <ScaffoldingTutorLab />
         ) : (
           <DigestiveLab />
         )}

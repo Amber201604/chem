@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { LearningEvent, TutorRequest } from '../src/learning/types.ts'
 import { gatewayStatus } from './env.ts'
 import { readJson, sendJson, sendText, teacherPinFrom } from './http.ts'
+import { getSftCatalogPayload } from './sftEngine.ts'
 import { appendEvent, buildDashboard, readJsonl } from './store.ts'
 import { runTutor } from './tutor.ts'
 
@@ -43,6 +44,10 @@ export async function handleLearningHttp(req: IncomingMessage, res: ServerRespon
     }
     if (url.searchParams.get('format') === 'jsonl') {
       sendText(res, 200, await readJsonl(), 'application/x-ndjson; charset=utf-8')
+      return
+    }
+    if (url.searchParams.get('format') === 'sft') {
+      sendJson(res, 200, getSftCatalogPayload())
       return
     }
     const dashboard = await buildDashboard()

@@ -9,7 +9,7 @@ function createId() {
 }
 
 function isModelId(value: string): value is TutorModelId {
-  return value === MODEL_IDS.terra || value === MODEL_IDS.flash
+  return value === MODEL_IDS.sft || value === MODEL_IDS.terra || value === MODEL_IDS.flash
 }
 
 export function loadLearner(): LearnerProfile {
@@ -24,7 +24,7 @@ export function loadLearner(): LearnerProfile {
           sessionId: stale ? createId() : parsed.sessionId,
           sessionStartedAt: stale ? Date.now() : parsed.sessionStartedAt,
           condition: parsed.condition === 'fixed' ? 'fixed' : 'adaptive',
-          model: isModelId(parsed.model) ? parsed.model : MODEL_IDS.terra,
+          model: isModelId(parsed.model) ? parsed.model : MODEL_IDS.sft,
         }
       }
     }
@@ -36,7 +36,7 @@ export function loadLearner(): LearnerProfile {
     sessionId: createId(),
     sessionStartedAt: Date.now(),
     condition: 'adaptive',
-    model: MODEL_IDS.terra,
+    model: MODEL_IDS.sft,
   }
 }
 

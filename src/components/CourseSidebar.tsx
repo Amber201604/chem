@@ -1,6 +1,6 @@
 import { useI18n } from '../i18n/I18nProvider'
 
-export type CourseId = 'formula' | 'battery' | 'digest'
+export type CourseId = 'formula' | 'battery' | 'digest' | 'scaffold'
 
 type Props = {
   activeCourse: CourseId
@@ -13,6 +13,7 @@ const courses: Array<{ id: CourseId; number: string; icon: string }> = [
   { id: 'formula', number: '02.4', icon: '⚛' },
   { id: 'battery', number: '03.1', icon: '⚡' },
   { id: 'digest', number: '04.1', icon: '🍅' },
+  { id: 'scaffold', number: '05.1', icon: '🎓' },
 ]
 
 export function CourseSidebar({

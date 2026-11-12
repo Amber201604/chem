@@ -16,6 +16,12 @@ export const frBase = {
   'nav.formulaDesc': 'Construire des formules ioniques en 3D',
   'nav.battery': 'Comment fonctionne une pile',
   'nav.batteryDesc': 'Assembler une pile Daniell',
+  'nav.scaffold': 'Tuteur d’échafaudage',
+  'nav.scaffoldDesc': 'Q&R socratique SFT chimie',
+  'scaffold.title': '05.1 Tuteur d’Échafaudage',
+  'scaffold.eyebrow': 'CHIMIE SCH3U/SCH4U CANADA & AP · TUTEUR SFT SOCRATIQUE',
+  'scaffold.coreQuestion':
+    'Question centrale : comment relier observations, particules et équations par un questionnement guidé ?',
   'nav.note': 'Choisissez une leçon pour entrer dans son laboratoire interactif.',
 
   'console.title': 'Console d’entrée',
